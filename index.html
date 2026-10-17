@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="escuro">
+<head>
+<meta charset="utf-8" />
+<script>
+  /* Task 95: pede a previa da peca de abertura ja' no primeiro byte do HTML */
+  (function () {
+    try {
+      var V = {"jato-regional":"c1dd76a3c00b","cadeira-cad":"11e30948a5f2"};
+      var k = new URLSearchParams(location.search).get('kit') || 'jato-regional';
+      if (!V[k]) return;
+      var l = document.createElement('link');
+      l.rel = 'preload'; l.as = 'fetch'; l.crossOrigin = 'anonymous';
+      l.href = 'kits/' + k + '.lite.glb?v=' + V[k];
+      document.head.appendChild(l);
+    } catch (e) { /* nunca atrapalha a abertura */ }
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+
+<script>(function(){var d=document.documentElement,t=null,q=null;try{q=new URLSearchParams(location.search).get('tema')}catch(e){}if(q==='claro'||q==='escuro')t=q;else{try{var s=localStorage.getItem('3dfire.tema');if(s==='claro'||s==='escuro')t=s;else if(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='claro'}catch(e){}}if(t)d.setAttribute('data-tema',t)})();</script>
+<title>LSF 3Dfire — Modelagem 3D para iniciantes</title>
+<meta name="description" content="3Dfire: um simulador de modelagem 3D no navegador. Monte peças com linhas, planos e sólidos, desenhe e extrude a sua própria peça, abra kits em vista explodida e corte tudo ao meio para ver por dentro." />
+
+<meta name="theme-color" content="#050B14" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="LSF 3Dfire" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<meta property="og:title" content="LSF 3Dfire — Modelagem 3D para iniciantes" />
+<meta property="og:description" content="Pratique modelagem 3D direto no navegador: desenhe, extrude, explore em vista explodida e monte contra o relógio." />
+<meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23050B14'/%3E%3Cpath d='M32 8 54 20v24L32 56 10 44V20z' fill='none' stroke='%2322D3EE' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M32 8v20m0 0 22-8m-22 8-22-8m22 8v28' stroke='%23F2A429' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <script type="module" crossorigin src="./assets/index-BYXE-YIA.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-Ck0Z8ssV.css">
+</head>
+<body>
+  <div id="app">
+    <div id="stage" role="group" aria-label="Área de modelagem 3D"></div>
+
+    <header class="topbar">
+      <div class="brand" id="brand"></div>
+      <nav class="modes" role="tablist" aria-label="Modos do simulador">
+        <button class="chip chip--mode is-on" role="tab" data-mode="pecas" aria-selected="true"><span data-ic="galeria"></span><em>Galeria</em></button>
+        <button class="chip chip--mode" role="tab" data-mode="criar" aria-selected="false"><span data-ic="criar"></span><em>Criar</em></button>
+        <button class="chip chip--mode" role="tab" data-mode="desafio" aria-selected="false"><span data-ic="desafio"></span><em>Desafio</em></button>
+        <button class="chip chip--mode" role="tab" data-mode="livre" aria-selected="false"><span data-ic="livre"></span><em>Livre</em></button>
+      </nav>
+    </header>
+
+    
+    
+    
+    <div class="rail rail--left" role="group" aria-label="Modos de visualização">
+      <button class="rail-btn" data-act="tema"><i data-ic="tema-lua"></i><em>Tema</em></button>
+      <button class="rail-btn" data-act="wire"><i data-ic="sup-solido"></i><em>Sólido</em></button>
+      <button class="rail-btn" data-act="corte" data-ctx="corte"><i data-ic="corte"></i><em>Corte</em></button>
+      <button class="rail-btn" data-act="cotas"><i data-ic="cotas"></i><em>Cotas</em></button>
+    </div>
+
+    <div class="rail rail--right" role="group" aria-label="Ferramentas">
+      <button class="rail-btn" data-act="explodir" data-ctx="explodir"><i data-ic="explodir"></i><em>Explodir</em></button>
+      <button class="rail-btn" data-act="eixos"><i data-ic="eixos"></i><em>Eixos</em></button>
+      <button class="rail-btn" data-act="vista"><i data-ic="vista"></i><em>Vista</em></button>
+      <button class="rail-btn" data-act="spin"><i data-ic="girar"></i><em>Girar</em></button>
+    </div>
+
+    <div class="topstrip" id="topstrip">
+      <div class="row row--scroll" id="row-kits-1" role="group" aria-label="Modelos da galeria"></div>
+    </div>
+
+    <div class="nota" id="nota" role="status" aria-live="polite" hidden>
+      <strong id="nota-titulo"></strong><span id="nota-texto"></span>
+    </div>
+
+    <div class="hud" id="hud" aria-live="polite"></div>
+
+    
+    <div class="guide" id="guide" hidden>
+      <span class="guide-tip" id="guide-tip">Toque em qualquer lugar do chão para criar o contorno da sua peça.</span>
+      
+    </div>
+
+    
+    <div id="ctx" hidden>
+      <div class="ctx" data-ctx="altura">
+        <div class="ctx-row">
+          <input id="altura" type="range" min="20" max="300" value="40" aria-label="Altura da extrusão" />
+          <output id="altura-out">1,0</output>
+        </div>
+      </div>
+
+      <div class="ctx" data-ctx="cor-criar">
+        <div class="ctx-head">
+          <b>Cor da peça</b>
+          <button class="ctx-x" data-act="ctx-fechar" aria-label="Fechar"><span data-ic="fechar"></span></button>
+        </div>
+        <div class="ctx-row row--scroll" id="row-cores-criar" role="group" aria-label="Cor da peça"></div>
+      </div>
+
+      <div class="ctx" data-ctx="formas">
+        <div class="ctx-head">
+          <b><span data-ic="livre"></span> Formas para adicionar</b>
+          <button class="ctx-x" data-act="ctx-fechar" aria-label="Fechar"><span data-ic="fechar"></span></button>
+        </div>
+        <div class="ctx-row row--scroll" id="row-primitivas" role="group" aria-label="Formas para adicionar"></div>
+      </div>
+
+      <div class="ctx" data-ctx="cor-livre">
+        <div class="ctx-head">
+          <b>Cores</b>
+          <button class="ctx-x" data-act="ctx-fechar" aria-label="Fechar"><span data-ic="fechar"></span></button>
+        </div>
+        <div class="ctx-row row--scroll" id="row-cores" role="group" aria-label="Cores"></div>
+      </div>
+
+      
+      <div class="ctx" data-ctx="mover">
+        <div class="ctx-head">
+          <b><span data-ic="mover"></span> Mover</b>
+          <button class="ctx-x" data-act="ctx-fechar" aria-label="Fechar"><span data-ic="fechar"></span></button>
+        </div>
+        <div class="ctx-row row--scroll" id="row-mover" role="group" aria-label="Mover a peça">
+          <button class="chip" data-tmode="mover-x"><span data-ic="eixo-x"></span> X</button>
+          <button class="chip" data-tmode="mover-y"><span data-ic="eixo-y"></span> Y</button>
+          <button class="chip" data-tmode="altura"><span data-ic="eixo-z"></span> Z</button>
+          <button class="chip" data-tmode="escalar"><span data-ic="tamanho"></span> Aumentar</button>
+        </div>
+      </div>
+
+      
+      
+      
+      <div class="ctx" data-ctx="corte">
+        
+        <div class="ctx-row">
+          <input id="corte-pos" type="range" min="0" max="100" value="50" aria-label="Posição do corte" />
+        </div>
+      </div>
+
+      <div class="ctx" data-ctx="explodir">
+        <div class="ctx-row">
+          <input id="explode" type="range" min="0" max="100" value="0" aria-label="Quanto separar as peças" />
+          <output id="explode-out">0%</output>
+        </div>
+      </div>
+    </div>
+
+    <footer class="dock">
+      
+      <button class="chip demo-fixo" id="btn-demo" data-act="demo" aria-pressed="false"><span data-ic="demo"></span> Demo</button>
+
+      
+      <div class="ctx ctx--opcoes" data-ctx="corte">
+        <div class="ctx-row row--scroll" id="corte-eixos">
+          <button class="chip chip--ghost" data-act="corte-flip"><span data-ic="inverter"></span> Inverter</button>
+        </div>
+      </div>
+      <div class="ctx ctx--opcoes" data-ctx="explodir">
+        <div class="ctx-row row--scroll">
+          <button class="chip" data-act="explode-anim"><span data-ic="desmontar"></span> Desmontar</button>
+          <button class="chip chip--ghost" data-act="pecas-list"><span data-ic="lista"></span> Lista</button>
+        </div>
+      </div>
+
+      
+      
+      <section class="panel is-on" data-panel="pecas"></section>
+
+      
+      <section class="panel" data-panel="desafio">
+        
+        <div class="row row--scroll">
+          <button class="chip" data-act="desafio-tirar-selecao"><span data-ic="fechar"></span> Tirar seleção</button>
+          <span class="timer" id="timer">0:00</span>
+          <button class="chip" data-act="restart"><span data-ic="reiniciar"></span> Reiniciar</button>
+        </div>
+      </section>
+
+      
+      <section class="panel" data-panel="criar">
+        
+        <div class="row row--scroll">
+          <button class="chip" data-act="criar-limpar"><span data-ic="reiniciar"></span> Reiniciar</button>
+          <button class="chip is-on" data-act="criar-fechar" disabled><span data-ic="fechar-forma"></span> Fechar forma</button>
+          <button class="concluir-topo" id="concluir-topo" data-act="criar-concluir" hidden><span data-ic="concluir"></span> Concluir</button>
+        </div>
+      </section>
+
+      
+      <section class="panel" data-panel="livre">
+        <div class="row row--scroll">
+          <button class="chip" data-ctx="formas"><span data-ic="livre"></span> Formas</button>
+          <button class="chip" data-ctx="cor-livre"><span data-ic="tamanho"></span> Cor</button>
+          
+          <button class="chip" data-ctx="mover"><span data-ic="mover"></span> Mover</button>
+        </div>
+      </section>
+
+    </footer>
+
+    
+    <div class="guiado" id="guiado">
+      <button class="guiado-btn" data-act="guiado-explodir"><i data-ic="explodir"></i><em>Explodir</em></button>
+      <button class="guiado-btn" data-act="guiado-montar"><i data-ic="montar"></i><em>Montar</em></button>
+    </div>
+
+    <div class="busy" id="busy" role="status" aria-live="polite" hidden>
+      <span class="busy-spin"></span><span id="busy-nome">carregando…</span>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <div class="sheet" id="sheet" hidden>
+      <div class="sheet-card">
+        <button class="sheet-close" data-act="sheet-close" aria-label="Fechar"><span data-ic="fechar"></span></button>
+        <div class="sheet-body" id="sheet-body"></div>
+      </div>
+    </div>
+
+    <div class="loader" id="loader"><div class="loader-cube"></div><span>carregando o 3Dfire…</span></div>
+  </div>
+</body>
+</html>
